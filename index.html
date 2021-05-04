@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6" crossorigin="anonymous">
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <title>Quickpic</title>
@@ -26,7 +27,46 @@
         </li>
       </ul>
     </header>
-    <main role="main"></main>
+    <main role="main">
+      <div id="posts-container"> 
+
+      </div>
+      <button type="button" class="btn btn-light" id="view-add-post-model">Create post</button>
+    </main>
+    <div class="model inactive">
+      <form id="create-post">
+        <div class="title">
+          <div></div> 
+          <h2>Add post</h2>
+          <img id="close-model" class="close-icon" src="./assets/close.svg" alt="close icon" />
+        </div>
+    
+    
+        <div class="form-row">
+          <label for="descr">Description:</label>
+          <input
+            id="descr"
+            name="descr"
+            type="text"
+            value="This is a cute photo :)"
+            placeholder="This is a cute photo :)"
+            required
+          />
+        </div>
+    
+        <div class="form-row">
+          <input
+            id="src"
+            name="src"
+            type="file"
+            accept="image/png, image/jpeg"
+            required
+          />
+        </div>
+    
+        <button type="submit" class="primary">Create post</button>
+      </form>
+    </div>
     <footer>
       <p>&copy; Quickpic</p>
     </footer>

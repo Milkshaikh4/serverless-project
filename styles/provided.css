@@ -21,7 +21,7 @@ body {
 }
 
 main {
-  height: fit-content;
+  height: 100%;
 }
 
 button:focus {
@@ -699,4 +699,26 @@ form > .primary {
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
+}
+
+
+/* Serverless-project styles */
+
+#posts-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+button[id="view-add-post-model"] {
+  margin: 10px auto;
+  display: block;
+}
+
+form[id="create-post"] {
+  display: none;
+}
+
+form, .active {
+  display: block !important;
 }
