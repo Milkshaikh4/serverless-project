@@ -31,6 +31,14 @@ functions:
       - http: 
           path: post
           method: post
+  listPosts: 
+    handler: api/candidate.list
+    memorySize: 128
+    description: List all posts
+    events:
+      - http: 
+          path: post
+          method: get  
 
 resources: 
   Resources: 
