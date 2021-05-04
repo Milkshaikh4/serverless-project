@@ -1,0 +1,50 @@
+org: nabilshaikhnabil
+app: serverless-project-app
+service: post-service
+
+frameworkVersion: ">=2.39.0"
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  stage: dev
+  profile: personal
+  region: ap-southeast-2
+  environment:
+    POST_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+  lambdaHashingVersion: 20201221
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+      Resource: "*"
+
+functions:
+  createPost:
+    handler: api/post.create
+    memorySize: 128
+    description: Create post
+    events:
+      - http: 
+          path: post
+          method: post
+
+resources: 
+  Resources: 
+    PostsDynamoDbTable: 
+      Type: 'AWS::DynamoDB::Table'
+      Properties: 
+        AttributeDefinitions: 
+          - 
+            AttributeName: "id"
+            AttributeType: "S"
+        KeySchema: 
+          - 
+            AttributeName: "id"
+            KeyType: "HASH"
+        StreamSpecification: 
+          StreamViewType: "NEW_AND_OLD_IMAGES"
+        TableName: ${self:provider.environment.CANDIDATE_TABLE}
