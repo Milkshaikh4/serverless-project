@@ -1,0 +1,24 @@
+{
+  "name": "serverless-project",
+  "version": "1.0.0",
+  "description": "Experimenting with serverless capabilities",
+  "main": "index.js",
+  "scripts": {
+    "test": "sls invoke test"
+  },
+  "author": "Nabil Shaikh",
+  "license": "ISC",
+  "dependencies": {
+    "@middy/core": "^2.2.0",
+    "@middy/http-cors": "^2.2.0",
+    "@middy/http-error-handler": "^2.2.0",
+    "bluebird": "^3.7.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.900.0",
+    "dirty-chai": "^2.0.1",
+    "lambda-wrapper": "^0.3.0",
+    "serverless-mocha-plugin": "^1.12.0"
+  }
+}

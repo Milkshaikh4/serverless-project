@@ -4,14 +4,17 @@ service: post-service
 
 frameworkVersion: ">=2.39.0"
 
+plugins:
+  - serverless-mocha-plugin
+
 provider:
   name: aws
-  runtime: nodejs12.x
+  runtime: nodejs14.x
   stage: dev
   profile: personal
   region: ap-southeast-2
   environment:
-    POST_TABLE: ${self:service}-${opt:stage, self:provider.stage}
+    POST_TABLE: post-service-dev
   lambdaHashingVersion: 20201221
   iamRoleStatements:
     - Effect: Allow
@@ -31,19 +34,31 @@ functions:
       - http: 
           path: post
           method: post
+          cors: true
   listPosts: 
-    handler: api/candidate.list
+    handler: api/post.list
     memorySize: 128
     description: List all posts
     events:
       - http: 
           path: post
-          method: get  
+          method: get 
+          cors: true
+  deletePost: 
+    handler: api/post.deletePost
+    memorySize: 128
+    description: delete post by id
+    events:
+      - http: 
+          path: post
+          method: delete 
+          cors: true
 
 resources: 
   Resources: 
     PostsDynamoDbTable: 
       Type: 'AWS::DynamoDB::Table'
+      DeletionPolicy: Retain
       Properties: 
         AttributeDefinitions: 
           - 
@@ -53,6 +68,9 @@ resources:
           - 
             AttributeName: "id"
             KeyType: "HASH"
+        ProvisionedThroughput: 
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
         StreamSpecification: 
           StreamViewType: "NEW_AND_OLD_IMAGES"
-        TableName: ${self:provider.environment.CANDIDATE_TABLE}
+        TableName: ${self:provider.environment.POST_TABLE}

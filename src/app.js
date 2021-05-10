@@ -1,6 +1,5 @@
+/* eslint-disable no-undef */
 (function () {
-  "use strict";
-
   /**
    * Sets up a brand new SPA.
    */
@@ -11,9 +10,10 @@
     this.controller = new app.Controller(this.view, this.model);
   }
 
-  var spa = new SPA();
+  const spa = new SPA();
 
+  spa.controller.getFeed();
   // Debug
   window.state = spa.model.getState;
   window.spa = spa;
-})();
+}());

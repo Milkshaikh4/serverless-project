@@ -1,89 +1,111 @@
-"use strict";
+/* eslint-disable no-console */
+const middy = require('@middy/core');
+const cors = require('@middy/http-cors');
+const httpErrorHandler = require('@middy/http-error-handler');
 
-const uuid = require("uuid");
-const AWS = require("aws-sdk");
+const uuid = require('uuid');
+const AWS = require('aws-sdk');
 
-AWS.config.setPromisesDependency(require("bluebird"));
+if (process.env.IS_LOCAL) {
+  const credentials = new AWS.SharedIniFileCredentials({ profile: 'personal' });
+  AWS.config.credentials = credentials;
+}
+
+AWS.config.update({ region: 'ap-southeast-2' });
+AWS.config.setPromisesDependency(require('bluebird'));
 
 const db = new AWS.DynamoDB.DocumentClient();
 
-module.exports.create = (event, context, callback) => {
+const create = middy((event) => {
   const { descr, img } = JSON.parse(event.body);
 
-  if (typeof descr !== "string" || typeof img !== "string") {
-    console.error("Validation Failed");
-    callback(
-      new Error("Couldn't submit candidate because of validation errors.")
-    );
-    return;
+  if (typeof descr !== 'string' || typeof img !== 'string') {
+    throw new Error("Couldn't submit post because of validation errors.");
   }
 
-  const success = (id) => {
-    return {
-      statusCode: 200,
-      body: JSON.stringify({
-        message: "Successfully created post",
-        id,
-      }),
-    };
-  };
+  return submitPost(post(descr, img));
+});
 
-  const error = (error) => {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: `Unable to create post`,
-        error
-      }),
-    };
-  };
+create.use(httpErrorHandler()).use(cors());
 
-  submitPost(post(descr, img))
-    .then((res) => callback(null, success(res.id)))
-    .catch((err) => callback(null, error(err)));
-};
-
-module.exports.list = (event, context, callback) => {
+const list = middy(() => {
   const params = {
-    TableName: process.env.CANDIDATE_TABLE,
-    ProjectionExpression: "descr, img",
+    TableName: process.env.POST_TABLE,
   };
 
-  console.log("Scanning Candidate table.");
+  console.log({
+    message: 'getting posts from db',
+    params,
+  });
 
   const onScan = (err, data) => {
     if (err) {
-      console.log(
-        "Scan failed to load data. Error JSON:",
-        JSON.stringify(err, null, 2)
-      );
-      callback(err);
-      return;
+      console.log({
+        message: 'Error in getting posts',
+        err,
+      });
+      return err;
     }
-    
-    console.log("Scan succeeded.");
-    return callback(null, {
-      statusCode: 200,
-      body: JSON.stringify({
-        posts: data.Items,
-      }),
-    });
+
+    return data.Items;
   };
 
-  db.scan(params, onScan);
-};
+  return db
+    .scan(params, onScan)
+    .promise()
+    .then((posts) => success({ posts }));
+});
+
+list.use(httpErrorHandler()).use(cors());
+
+const deletePost = middy((event) => {
+  const params = {
+    TableName: process.env.POST_TABLE,
+    key: {
+      id: event.pathParameters.id
+    },
+  };
+
+  console.log({
+    msg: 'deleting item',
+    params,
+  });
+
+  const handleHook = (err, data) => {
+    if (err) console.log(err, err.stack);
+    else console.log(data);
+  };
+
+  return db.delete(params, handleHook).promise();
+});
+
+deletePost.use(httpErrorHandler()).use(cors());
+
+const success = (body) => ({
+  statusCode: 200,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    ...body,
+  }),
+});
 
 const submitPost = (post) => {
-  console.log("Creating post");
   const payload = {
-    TableName: process.env.CANDIDATE_TABLE,
+    TableName: process.env.POST_TABLE,
     Item: post,
   };
+
+  console.log({
+    message: 'pushing post to db',
+    payload,
+  });
 
   return db
     .put(payload)
     .promise()
-    .then((res) => post);
+    .then(() => success({ message: 'Successfully created post', post }));
 };
 
 const post = (descr, img) => {
@@ -96,3 +118,5 @@ const post = (descr, img) => {
     updatedAt: timestamp,
   };
 };
+
+module.exports = { create, list, deletePost };

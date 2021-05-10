@@ -1,6 +1,4 @@
 (function (window) {
-  "use strict";
-
   const editModelTemplate = `
   <form>
     <div class="title">
@@ -49,35 +47,27 @@
   </div>
   `;
 
-  const postTemplate = (isUser) => `
-  <li data-id="{{id}}" class="post-container" id="post{{id}}">
+  const postTemplate = `
+  <li data-id="{{id}}" class="post-container" id="post">
     <div class="post">
       <div class="header">
         <div>
-          <a class="to-user">
-            <h4>{{author}}</h4>
-          </a>
+          <h4>Nabil Shaikh</h4>
           <small>{{displayDate}}</small>
         </div>
-        ${isUser ? optionsTemplate : "<div></div>"}
+        <div>
+          <button class="options-popover" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="right" data-bs-content="Right popover"></button>
+        </div>
       </div>
-      <img src="data:image/png;base64, {{src}}" alt="Image post"/>
+      <img src="data:image/jpg;base64, {{src}}" alt="Image post" id="post-image"/>
       <div class="desc">
-        <p class="desc-text">{{desc}}</p>
+        <p class="desc-text">{{descr}}</p>
         <div class='flex'>
           <button class="like" data-id="{{id}}"></button>
           <div class="active-like inactive" data-id="{{id}}" id="active-like-post-{{id}}"></div>
           <button class="show-comment"></button> 
-        </div> 
-        <div class="row-apart">
-          <small id="display-liked-{{id}}">Likes {{likesNum}}</small>
-          <small id="display-comments-{{id}}">{{commentsNum}} comments</small>
         </div>
       </div>
-      <div>
-      <div class="comment-section" id="comment-section-{{id}}">
-
-      <div>
     </div>
   </li>
   `;
@@ -400,71 +390,52 @@
   `;
 
   const commentContent = {
-    getTemplate: ({}) => commentContentTemplate,
-    items: ["comments", "id"],
+    getTemplate: () => commentContentTemplate,
+    items: ['comments', 'id'],
   };
 
   const comment = {
-    getTemplate: ({}) => commentTemplate,
-    items: ["author", "comment", "published"],
+    getTemplate: () => commentTemplate,
+    items: ['author', 'comment', 'published'],
   };
 
   const post = {
-    getTemplate: ({ isUser = false }) => postTemplate(isUser),
+    getTemplate: () => postTemplate,
     items: [
-      "id",
-      "author",
-      "src",
-      "desc",
-      "likesNum",
-      "displayDate",
-      "commentsNum",
+      'id',
+      'src',
+      'descr',
+      'displayDate',
     ],
   };
 
   const userPage = {
-    getTemplate: ({}) => userPageTemplate,
+    getTemplate: () => userPageTemplate,
     items: [
-      "id",
-      "username",
-      "numPosts",
-      "numFollowers",
-      "numFollowing",
-      "followActionText",
-      "fullname",
-      "avatarSrc",
+      'id',
+      'username',
+      'numPosts',
+      'numFollowers',
+      'numFollowing',
+      'followActionText',
+      'fullname',
+      'avatarSrc',
     ],
   };
 
   const profile = {
-    getTemplate: ({}) => profileTemplate,
+    getTemplate: () => profileTemplate,
     items: [
-      "id",
-      "username",
-      "numPosts",
-      "numFollowers",
-      "numFollowing",
-      "fullname",
-      "avatarSrc",
-      "email",
+      'id',
+      'username',
+      'numPosts',
+      'numFollowers',
+      'numFollowing',
+      'fullname',
+      'avatarSrc',
+      'email',
     ],
   };
-
-  const login = {
-    getTemplate: ({}) => loginFormTemplate,
-    items: [],
-  };
-
-  const signup = {
-    getTemplate: ({}) => signupFormTemplate,
-    items: [],
-  };
-
-  const emptyState = {
-    getTemplate: ({}) => emptyStateTemplate,
-    items: [],
-  };
-
   /**
    * Set ups all templates
    *
@@ -476,9 +447,6 @@
       commentContent,
       comment,
       userPage,
-      login,
-      signup,
-      emptyState,
       profile,
     };
   }
@@ -492,10 +460,10 @@
    * @returns {string} HTML String containing the html of the template
    */
   Template.prototype.getTemplate = function (name, data = [{}], options = {}) {
-    if (!data) return "";
-    if (!Array.isArray(data)) return "";
+    if (!data) return '';
+    if (!Array.isArray(data)) return '';
 
-    let view = "";
+    let view = '';
     const params = this.templates[name].items;
 
     if (!params.length) return this.templates[name].getTemplate(options);
@@ -512,7 +480,7 @@
         template = template.replaceAll(`{{${param}}}`, data[i][param]);
       });
 
-      view = view + template;
+      view += template;
     }
 
     return view;
@@ -520,4 +488,4 @@
 
   window.app = window.app || {};
   window.app.Template = Template;
-})(window);
+}(window));

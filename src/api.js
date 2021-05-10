@@ -5,44 +5,49 @@
    * You may use this as a launch pad but do not have to.
    * @param {String} url */
   function API(url) {
+    this.env = {
+      post:
+        'https://iavsfwfbo7.execute-api.ap-southeast-2.amazonaws.com/dev/post',
+      get:
+        'https://iavsfwfbo7.execute-api.ap-southeast-2.amazonaws.com/dev/post',
+      delete:
+        'https://iavsfwfbo7.execute-api.ap-southeast-2.amazonaws.com/dev/post',
+      update: '',
+    };
     this.url = url;
   }
 
   API.prototype.encodeParams = function (params) {
-    return (
-      "?" +
-      Object.entries(params)
-        .map((kv) => kv.join("="))
-        .join("&")
-    );
+    return `?${Object.entries(params)
+      .map((kv) => kv.join('='))
+      .join('&')}`;
   };
 
-  API.prototype._request = function (path, params, options) {
-    return fetch(`${this.url}${path}${this.encodeParams(params)}`, options)
-      .then((res) => res.json())
-      .catch((err) => console.warn(`API_ERROR: ${err.message}`));
+  API.prototype._request = function (path, options) {
+    return fetch(path, options)
+      .catch((err) => console.warn(err));
   };
 
   /**
-   * Post request - returns a promise
+   * Create Post request - returns a promise
    *
-   * @param {String} path The relative path to the api end point
+   * @param {String} path The relative path to the lambda API gateway
    * @param {Obj} data Data as a json obj
    * */
-  API.prototype.post = function (path, data = {}, token = false) {
+  API.prototype.post = function (data) {
+    if (!data?.descr || !data?.img) return null;
+
     const options = {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     };
 
-    if (token) {
-      options.headers.Authorization = "Token " + token;
-    }
+    console.log(data);
 
-    return this._request(path, {}, options);
+    return this._request(this.env.post, options);
   };
 
   /**
@@ -51,17 +56,15 @@
    * @param {String} path The relative path to the api end point
    * @param {Obj} data Data as a json obj
    * */
-  API.prototype.get = function (path, params = {}, token = false) {
-    let options = {
-      method: "GET",
-      headers: {},
+  API.prototype.get = function () {
+    const options = {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
     };
 
-    if (token) {
-      options.headers.Authorization = "Token " + token;
-    }
-
-    return this._request(path, params, options);
+    return this._request(this.env.get, options);
   };
 
   /**
@@ -70,17 +73,15 @@
    * @param {String} path The relative path to the api end point
    * @param {Obj} data Data as a json obj
    * */
-  API.prototype.delete = function (path, params = {}, token = false) {
-    let options = {
-      method: "delete",
+  API.prototype.delete = function (params = {}) {
+    const options = {
+      method: 'delete',
       headers: {},
     };
 
-    if (token) {
-      options.headers.Authorization = "Token " + token;
-    }
+    const path = this.env.delete + this.encodeParams(params);
 
-    return this._request(path, params, options);
+    return this._request(path, options);
   };
 
   /**
@@ -93,18 +94,18 @@
     path,
     params = {},
     payload = {},
-    token = false
+    token = false,
   ) {
-    let options = {
-      method: "PUT",
+    const options = {
+      method: 'PUT',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(payload),
     };
 
     if (token) {
-      options.headers.Authorization = "Token " + token;
+      options.headers.Authorization = `Token ${token}`;
     }
 
     return this._request(path, params, options);
@@ -123,6 +124,8 @@
   };
 
   // Export to window
+  // eslint-disable-next-line no-param-reassign
   window.app = window.app || {};
+  // eslint-disable-next-line no-param-reassign
   window.app.API = API;
-})(window);
+}(window));

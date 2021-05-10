@@ -1,0 +1,33 @@
+{
+  "name": "serverless-project",
+  "version": "1.0.0",
+  "description": "Severless computing demo",
+  "main": "index.js",
+  "dependencies": {
+    "aws-sdk": "^2.900.0",
+    "http-server": "^0.12.3"
+  },
+  "devDependencies": {
+    "eslint": "^7.25.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1"
+  },
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/milkshaikh4/serverless-project.git"
+  },
+  "keywords": [
+    "serverless",
+    "node",
+    "js"
+  ],
+  "author": "Nabil Shaikh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/milkshaikh4/serverless-project/issues"
+  },
+  "homepage": "https://github.com/milkshaikh4/serverless-project#readme"
+}

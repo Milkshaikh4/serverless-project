@@ -286,7 +286,6 @@ form,
   border-top-left-radius: 5px;
   display: flex;
   justify-content: space-between;
-  align-items: center;
 }
 
 .header > * {
@@ -721,4 +720,15 @@ form[id="create-post"] {
 
 form, .active {
   display: block !important;
+}
+
+.options-popover {
+  outline: none;
+  background-image: url(../assets/options.svg);
+  background-repeat: no-repeat;
+  background-position: center;
+  border: none;
+  width: 20px;
+  height: 20px;
+  background-color: transparent;
 }

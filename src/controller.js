@@ -1,6 +1,6 @@
+/* eslint-disable no-restricted-globals */
+/* eslint-disable no-undef */
 (function (window) {
-  "use strict";
-
   /**
    * Takes an api ref and view and acts as the controller
    *
@@ -9,16 +9,17 @@
    */
 
   function Controller(view, model) {
-    var that = this;
+    const that = this;
     this.view = view;
-    this.api = new app.API("http://127.0.0.1:5000/");
+    // eslint-disable-next-line no-undef
+    this.api = new app.API('http://127.0.0.1:5000/');
     this.model = model;
 
-    this.view.bind("view-add-post-model", () =>
-      that.view.render("view-add-post-model")
-    );
+    this.view.bind('view-add-post-model', () => that.view.render('view-add-post-model'));
 
-    this.view.bind("submit-create-post", (e) => that.handleSubmitCreatePost(e));
+    this.view.bind('submit-create-post', (e) => {
+      that.handleSubmitCreatePost(e);
+    });
   }
 
   /**
@@ -27,64 +28,29 @@
    * * * * * * * * * * * *
    */
 
-  Controller.prototype._findPost = function (id, page) {
-    const state = this.model.getState();
-    const posts = state[page].posts;
-    let post = null;
-    let index = 0;
-
-    posts.forEach((_post, i) => {
-      if (_post.id == id) {
-        post = _post;
-        index = i;
-        return;
-      }
-    });
-
-    return [post, index];
-  };
-
-  Controller.prototype._postsToInitialState = function (posts) {
-    return posts.map((post) => {
-      post.showComments = false;
-      return post;
-    });
-  };
-
   Controller.prototype._toDisplayPostObjList = function (posts) {
-    const userID = this.model.getState().auth.id;
-
-    return posts.map((post) => {
-      const likes = post.meta.likes;
-      const comments = post.comments;
-      return {
-        id: post.id,
-        author: post.meta.author,
-        src: post.src,
-        likesNum: likes.length,
-        commentsNum: comments.length,
-        isLiked: likes.includes(userID),
-        showComments: post.showComments,
-        comments: post.comments,
-        displayDate: timestampeToDate(post.meta.published),
-        desc: post.meta.description_text,
-      };
-    });
+    return posts.map((post) => ({
+      id: post.id,
+      src: post.img,
+      displayDate: timestampeToDate(post.createdAt),
+      descr: post.descr,
+    }));
   };
 
   Controller.prototype.createPost = function (payload) {
-    // TODO - hook up to lamda
-    console.log("Create post not implemented");
+    return this.api.post(payload);
+  };
+
+  Controller.prototype.listAll = function () {
+    return this.api.get();
   };
 
   Controller.prototype._editPost = function (id, payload, token) {
-    return this.api.put("post/", { id }, payload, token);
+    return this.api.put('post/', { id }, payload, token);
   };
 
   Controller.prototype.deletePost = function (id) {
-    const token = this.auth();
-    if (!token) return null;
-    return this.api.delete("post/", { id }, token);
+    return this.api.delete('post/', { id });
   };
 
   /**
@@ -103,7 +69,7 @@
     });
 
     return this.api
-      .get("user/feed", { p, n }, token)
+      .get('user/feed', { p, n }, token)
       .then((data) => {
         this.model.setState((state) => {
           state.scroll.loading = false;
@@ -133,54 +99,50 @@
    * * * * * * * * * * * *
    */
 
-  Controller.prototype._fileToData64 = (element) =>
-    new Promise((resolve, reject) => {
-      const file = element.files[0];
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result);
-      reader.readAsDataURL(file);
-    });
+  Controller.prototype._fileToData64 = (element) => new Promise((resolve) => {
+    const file = element.files[0];
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
 
-  Controller.prototype.handleSubmitCreatePost = (e) => {
+  Controller.prototype.handleSubmitCreatePost = function (e) {
     if (e) e.preventDefault();
 
     const form = qs('form[id="create-post"]');
-    const descr = qs("#descr", form).value;
-    const image = qs("#src", form);
+    const descr = qs('#descr', form).value;
+    const image = qs('#src', form);
 
-    const r = new RegExp("^.*base64,(.*)$");
-
-    this._fileToData64(image).then((src) => {
-      const matches = r.exec(src);
-      const payload = { description_text: descr, src: matches[1] };
+    this._fileToData64(image).then((img) => {
+      const payload = { descr, img };
       this.createPost(payload);
     });
   };
 
-  Controller.prototype.validateEditPostForm = function (e) {
+  Controller.prototype.handleEditPost = function (e) {
     if (e) e.preventDefault();
 
     const form = e.target;
-    const lengthR = new RegExp(".{2,50}");
-    const descr = qs("#descr", form);
+    const lengthR = new RegExp('.{2,50}');
+    const descr = qs('#descr', form);
 
     if (!lengthR.test(descr.value)) {
-      this.view.render("signupLengthError"); //TODO
+      this.view.render('signupLengthError'); // TODO
     }
 
-    new FormData(form);
+    // TODO
   };
 
   Controller.prototype.editPost = function (e) {
     if (e) e.preventDefault();
 
     const form = e.target;
-    const descr = qs("#descr", form).value;
-    const image = qs("#src", form);
+    const descr = qs('#descr', form).value;
+    const image = qs('#src', form);
 
-    const id = parent(form, "LI").dataset.id;
+    const { id } = parent(form, 'LI').dataset;
 
-    const r = new RegExp("^.*base64,(.*)$");
+    const r = new RegExp('^.*base64,(.*)$');
 
     this._fileToData64(image).then((src) => {
       const matches = r.exec(src);
@@ -193,33 +155,18 @@
 
   // ------
 
-  Controller.prototype.goToFeed = function () {
-    document.location.hash = "#feed";
+  Controller.prototype.getFeed = function () {
+    console.log("fetch posts")
 
-    const token = this.auth();
-    if (!token) return null;
+    this.listAll().then((res) => res.json())
+      .then((res) => {
+        const { posts } = res;
+        console.log("recieved posts", posts)
 
-    this.model.setState((state) => {
-      state.scroll.p = 0;
-      return state;
-    });
-
-    this._getUserFeed().then((data) => {
-      if (data.posts.length === 0) {
-        this.view.render("empty-feed");
-        return;
-      }
-
-      this.model.setState((state) => {
-        state.feed.posts = this._postsToInitialState(data.posts);
-        return state;
+        this.view.render('feed', {
+          displayPosts: this._toDisplayPostObjList(posts.Items),
+        });
       });
-
-      const displayPosts = this._toDisplayPostObjList(data.posts);
-
-      if (!displayPosts) return;
-      this.view.render("to-feed", { displayPosts });
-    });
   };
 
   Controller.prototype.getMorePosts = function () {
@@ -245,11 +192,20 @@
       const displayPosts = this._toDisplayPostObjList(posts);
 
       if (!displayPosts) return;
-      this.view.render("to-feed", { displayPosts });
+      this.view.render('to-feed', { displayPosts });
     });
   };
 
+  Controller.prototype.reset = function (dataURL) {
+    const list = qsa('li[id="post"] #post-image');
+
+    list.forEach(elem => {
+      elem.src = dataURL;
+    })
+  }
+
   // Export to window
   window.app = window.app || {};
+  window.reset = Controller.prototype.reset; 
   window.app.Controller = Controller;
-})(window);
+}(window));
