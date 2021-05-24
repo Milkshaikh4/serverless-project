@@ -15,12 +15,55 @@
     this.api = new app.API('http://127.0.0.1:5000/');
     this.model = model;
 
-    this.view.bind('view-add-post-model', () => that.view.render('view-add-post-model'));
+    this.view.bind('view-add-post-model', () =>
+      that.view.render('view-add-post-model'),
+    );
 
     this.view.bind('submit-create-post', (e) => {
       that.handleSubmitCreatePost(e);
     });
+
+    this.view.registerEventAction('togglePopover', (popperInstance, tooltip) =>
+      that.togglePopover(popperInstance, tooltip),
+    );
+
+    this.view.registerEventAction('delete', (id) => that.handleDelete(id));
   }
+
+  /**
+   * * * * * * * * * * * *
+   *    UI Services      *
+   * * * * * * * * * * * *
+   */
+
+  Controller.prototype.togglePopover = function (popperInstance, tooltip) {
+    const { show = null } = tooltip.dataset;
+
+    const hidePopover = () => {
+      tooltip.removeAttribute('data-show');
+
+      popperInstance.setOptions({
+        modifiers: [{ name: 'eventListeners', enabled: false }],
+      });
+    };
+
+    const showPopver = () => {
+      tooltip.setAttribute('data-show', '');
+
+      popperInstance.setOptions({
+        modifiers: [{ name: 'eventListeners', enabled: true }],
+      });
+
+      // Update its position
+      popperInstance.update();
+    };
+
+    if (show !== null) {
+      hidePopover();
+    } else {
+      showPopver();
+    }
+  };
 
   /**
    * * * * * * * * * * * *
@@ -50,7 +93,7 @@
   };
 
   Controller.prototype.deletePost = function (id) {
-    return this.api.delete('post/', { id });
+    return this.api.delete({ id });
   };
 
   /**
@@ -59,37 +102,47 @@
    * * * * * * * * * * * *
    */
 
-  Controller.prototype._getUserFeed = function (p = 0, n = 5) {
-    const token = this.auth();
-    if (!token) return null;
+  Controller.prototype.handleDelete = function (id) {
+    if (typeof id !== 'string') {
+      console.warn('Invalid id string', id);
+      return;
+    }
 
-    this.model.setState((state) => {
-      state.scroll.loading = true;
-      return state;
-    });
+    console.log(`deleting ${id}`);
 
-    return this.api
-      .get('user/feed', { p, n }, token)
-      .then((data) => {
+    this.deletePost(id).then((res) => console.log(res));
+  };
+
+  Controller.prototype.getFeed = function () {
+    console.log('fetch posts');
+
+    const render = (items) => {
+      this.view.render('feed', {
+        displayPosts: this._toDisplayPostObjList(items),
+      });
+    };
+
+    // const _state = this.model.getState();
+
+    // const _posts = _state?.feed?.posts;
+
+    // if (_posts) {
+    //   console.log('Found posts in local storage');
+    //   render(_posts);
+    //   return;
+    // }
+
+    this.listAll()
+      .then((res) => {
+        console.log('fetch posts res', res);
+        const { Items } = res.posts;
+
         this.model.setState((state) => {
-          state.scroll.loading = false;
-          state.scroll.p += data.posts.length;
+          state.feed.posts = Items;
           return state;
         });
 
-        const state = this.model.getState();
-
-        return data;
-      })
-      .catch((err) => {
-        console.warn(err);
-        const _state = this.model.getState();
-
-        if (_state.feed.posts !== null) {
-          return this._toDisplayPostObjList(_state.feed.posts);
-        }
-
-        return [{}];
+        render(Items);
       });
   };
 
@@ -99,12 +152,13 @@
    * * * * * * * * * * * *
    */
 
-  Controller.prototype._fileToData64 = (element) => new Promise((resolve) => {
-    const file = element.files[0];
-    const reader = new FileReader();
-    reader.onloadend = () => resolve(reader.result);
-    reader.readAsDataURL(file);
-  });
+  Controller.prototype._fileToData64 = (element) =>
+    new Promise((resolve) => {
+      const file = element.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.readAsDataURL(file);
+    });
 
   Controller.prototype.handleSubmitCreatePost = function (e) {
     if (e) e.preventDefault();
@@ -155,57 +209,16 @@
 
   // ------
 
-  Controller.prototype.getFeed = function () {
-    console.log("fetch posts")
-
-    this.listAll().then((res) => res.json())
-      .then((res) => {
-        const { posts } = res;
-        console.log("recieved posts", posts)
-
-        this.view.render('feed', {
-          displayPosts: this._toDisplayPostObjList(posts.Items),
-        });
-      });
-  };
-
-  Controller.prototype.getMorePosts = function () {
-    const token = this.auth();
-    if (!token) return;
-
-    const state = this.model.getState();
-    let posts = state.feed.posts.length ? [...state.feed.posts] : [];
-
-    const { p, n, loading } = state.scroll;
-
-    if (loading) return;
-
-    this._getUserFeed(p, n).then((data) => {
-      const newPosts = this._postsToInitialState(data.posts);
-      posts = posts.concat(newPosts);
-
-      this.model.setState((_state) => {
-        _state.feed.posts = [...posts];
-        return _state;
-      });
-
-      const displayPosts = this._toDisplayPostObjList(posts);
-
-      if (!displayPosts) return;
-      this.view.render('to-feed', { displayPosts });
-    });
-  };
-
   Controller.prototype.reset = function (dataURL) {
     const list = qsa('li[id="post"] #post-image');
 
-    list.forEach(elem => {
+    list.forEach((elem) => {
       elem.src = dataURL;
-    })
-  }
+    });
+  };
 
   // Export to window
   window.app = window.app || {};
-  window.reset = Controller.prototype.reset; 
+  window.reset = Controller.prototype.reset;
   window.app.Controller = Controller;
 }(window));

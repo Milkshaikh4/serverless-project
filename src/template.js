@@ -55,11 +55,17 @@
           <h4>Nabil Shaikh</h4>
           <small>{{displayDate}}</small>
         </div>
-        <div>
-          <button class="options-popover" data-bs-container="body" data-bs-toggle="popover" data-bs-placement="right" data-bs-content="Right popover"></button>
+        <div id="popover-container">
+          <button class="options-popover" id="options" aria-describedby="tooltip"></button>
+          <div id="tooltip" role="tooltip">
+            <div class="tooltip-item" id="delete-action">
+              <img class="delete-icon" src="./assets/delete.svg"></img>
+              <span>Delete</span>
+            </div>
+          </div>
         </div>
       </div>
-      <img src="data:image/jpg;base64, {{src}}" alt="Image post" id="post-image"/>
+      <img src="{{src}}" alt="Image post" id="post-image"/>
       <div class="desc">
         <p class="desc-text">{{descr}}</p>
         <div class='flex'>

@@ -38,7 +38,7 @@
 
       case 'view-add-post-model':
         {
-          const model = parent(this.$createPostForm);
+          const model = $parent(this.$createPostForm);
           this._toggleVisibility(model);
         }
         break;
@@ -52,6 +52,24 @@
           ulWrapper.innerHTML = this.template.getTemplate('post', displayPosts);
           const container = qs('#posts-container');
           container.appendChild(ulWrapper);
+
+          qsa('#popover-container').forEach((elem) => {
+            const button = qs('#options', elem);
+            const tooltip = qs('#tooltip', elem);
+            const popperInstance = Popper.createPopper(button, tooltip, {
+              placement: 'right-start',
+            });
+
+            $on(button, 'click', () =>
+              this.eventFunctions.togglePopover(popperInstance, tooltip),
+            );
+            const deleteButton = qs('#delete-action', tooltip);
+            const { id } = $parent(tooltip, 'LI').dataset;
+
+            console.log('delete button', { deleteButton, id });
+
+            $on(deleteButton, 'click', () => this.eventFunctions.delete(id));
+          });
         }
         break;
 
@@ -128,7 +146,6 @@
         break;
 
       case 'submit-create-post':
-
         $on(this.$createPostForm, 'submit', (e) => {
           handler(e);
         });

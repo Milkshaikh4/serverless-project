@@ -1,7 +1,5 @@
 // All these functions are now global
 (function (window) {
-  "use strict";
-
   // Get element(s) by CSS selector:
   window.qs = function (selector, scope) {
     return (scope || document).querySelector(selector);
@@ -10,7 +8,7 @@
     return (scope || document).querySelectorAll(selector);
   };
 
-  window.parent = function (elem, parentTag = null) {
+  window.$parent = function (elem, parentTag = null) {
     if (!parentTag) return elem.parentNode;
 
     while (elem.parentNode.tagName !== parentTag) elem = elem.parentNode;
@@ -39,11 +37,11 @@
    * @return {Promise<string>} Promise which resolves to the file as a data url.
    */
   window.fileToDataUrl = function (file) {
-    const validFileTypes = ["image/jpeg", "image/png", "image/jpg"];
+    const validFileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
     const valid = validFileTypes.find((type) => type === file.type);
     // Bad data, let's walk away.
     if (!valid) {
-      throw Error("provided file is not a png, jpg or jpeg image.");
+      throw Error('provided file is not a png, jpg or jpeg image.');
     }
 
     const reader = new FileReader();
@@ -60,4 +58,4 @@
   };
 
   NodeList.prototype.forEach = Array.prototype.forEach;
-})(window);
+}(window));

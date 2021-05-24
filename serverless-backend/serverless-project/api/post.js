@@ -14,7 +14,16 @@ if (process.env.IS_LOCAL) {
 AWS.config.update({ region: 'ap-southeast-2' });
 AWS.config.setPromisesDependency(require('bluebird'));
 
-const db = new AWS.DynamoDB.DocumentClient();
+const clientOptions = (process.env.IS_LOCAL
+  ? {
+    region: 'localhost',
+    endpoint: 'http://localhost:8000',
+    accessKeyId: 'DEFAULT_ACCESS_KEY',
+    secretAccessKey: 'DEFAULT_SECRET',
+  }
+  : {});
+
+const db = new AWS.DynamoDB.DocumentClient(clientOptions);
 
 const create = middy((event) => {
   const { descr, img } = JSON.parse(event.body);
@@ -59,10 +68,17 @@ const list = middy(() => {
 list.use(httpErrorHandler()).use(cors());
 
 const deletePost = middy((event) => {
+  const { id = null } = event.pathParameters;
+
+  if (id === null) {
+    console.error('id is undefined');
+    return new Error('id is undefined');
+  }
+
   const params = {
     TableName: process.env.POST_TABLE,
-    key: {
-      id: event.pathParameters.id
+    Key: {
+      id,
     },
   };
 

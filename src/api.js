@@ -25,6 +25,7 @@
 
   API.prototype._request = function (path, options) {
     return fetch(path, options)
+      .then((res) => res.json())
       .catch((err) => console.warn(err));
   };
 
@@ -79,7 +80,9 @@
       headers: {},
     };
 
-    const path = this.env.delete + this.encodeParams(params);
+    console.log('delete params', params);
+
+    const path = `${this.env.delete}/${params.id}}`;
 
     return this._request(path, options);
   };
@@ -91,10 +94,8 @@
    * @param {Obj} data Data as a json obj
    * */
   API.prototype.put = function (
-    path,
     params = {},
     payload = {},
-    token = false,
   ) {
     const options = {
       method: 'PUT',
@@ -104,11 +105,7 @@
       body: JSON.stringify(payload),
     };
 
-    if (token) {
-      options.headers.Authorization = `Token ${token}`;
-    }
-
-    return this._request(path, params, options);
+    return this._request(this.env.update, params, options);
   };
 
   /**

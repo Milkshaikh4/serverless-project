@@ -732,3 +732,33 @@ form, .active {
   height: 20px;
   background-color: transparent;
 }
+
+#tooltip {
+  color: #333;
+  background-color: white;
+  font-weight: bold;
+  padding: 4px 8px;
+  font-size: 13px;
+  border-radius: 4px;
+  display: none;
+  margin-left: 12px !important; 
+  box-shadow: 0 1px 1px rgb(0 0 0 / 30%);
+}
+
+#tooltip[data-show] {
+  display: block;
+}
+
+.tooltip-item {
+  display: flex;
+  align-items: center;
+}
+
+#delete-action {
+  cursor: pointer;
+}
+
+.delete-icon {
+  object-fit: contain;
+  width:20px;
+}

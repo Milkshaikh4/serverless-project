@@ -6,6 +6,14 @@ frameworkVersion: ">=2.39.0"
 
 plugins:
   - serverless-mocha-plugin
+  - serverless-dynamodb-local
+  - serverless-offline
+custom:
+  dynamodb:
+    start:
+      migrate: true
+    stages: 
+      - dev
 
 provider:
   name: aws
@@ -23,6 +31,7 @@ provider:
         - dynamodb:Scan
         - dynamodb:GetItem
         - dynamodb:PutItem
+        - dynamodb:DeleteItem
       Resource: "*"
 
 functions:
@@ -50,9 +59,13 @@ functions:
     description: delete post by id
     events:
       - http: 
-          path: post
+          path: post/{id}
           method: delete 
           cors: true
+    request:
+      parameters:
+        paths:
+          id: true
 
 resources: 
   Resources: 
