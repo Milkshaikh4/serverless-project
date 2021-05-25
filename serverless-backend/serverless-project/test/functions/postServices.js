@@ -82,6 +82,22 @@ describe.only('Test API functions', () => {
       expect(res).to.be.empty();
     });
   });
+
+  it('Should list no posts', async function () {
+    const params = {
+      FunctionName: 'post-service-dev-listPosts',
+      InvocationType: 'RequestResponse',
+      Payload: JSON.stringify({}),
+    };
+
+    const raw = await api.invoke(params).promise();
+    const res = JSON.parse(raw.Payload);
+    const body = JSON.parse(res.body);
+
+    expect(body.posts.Count === 0);
+    expect(res).to.not.be.empty();
+    expect(res.statusCode).to.eq(200);
+  });
 });
 
 describe('UpdatePost', () => {
