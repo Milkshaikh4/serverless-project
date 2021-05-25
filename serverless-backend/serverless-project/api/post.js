@@ -2,17 +2,19 @@
 const middy = require('@middy/core');
 const cors = require('@middy/http-cors');
 const httpErrorHandler = require('@middy/http-error-handler');
-const dynamodb = require('serverless-dynamodb-client');
 
 const uuid = require('uuid');
 const AWS = require('aws-sdk');
+
+AWS.config.update({ region: 'ap-southeast-2' });
+
+const dynamodb = require('serverless-dynamodb-client');
 
 // if (process.env.IS_OFFLINE) {
 const credentials = new AWS.SharedIniFileCredentials({ profile: 'personal' });
 AWS.config.credentials = credentials;
 // }
 
-AWS.config.update({ region: 'ap-southeast-2' });
 AWS.config.setPromisesDependency(require('bluebird'));
 
 // const clientOptions = process.env.IS_OFFLINE
