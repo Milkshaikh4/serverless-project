@@ -10,23 +10,11 @@ AWS.config.update({ region: 'ap-southeast-2' });
 
 const dynamodb = require('serverless-dynamodb-client');
 
-// if (process.env.IS_OFFLINE) {
 const credentials = new AWS.SharedIniFileCredentials({ profile: 'personal' });
 AWS.config.credentials = credentials;
-// }
 
 AWS.config.setPromisesDependency(require('bluebird'));
 
-// const clientOptions = process.env.IS_OFFLINE
-//   ? {
-//     region: 'localhost',
-//     endpoint: 'http://localhost:8000',
-//     accessKeyId: 'DEFAULT_ACCESS_KEY',
-//     secretAccessKey: 'DEFAULT_SECRET',
-//   }
-//   : {};
-
-// const db = new AWS.DynamoDB.DocumentClient();
 const db = dynamodb.doc;
 
 const create = middy((event) => {
