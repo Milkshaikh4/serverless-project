@@ -2,28 +2,30 @@
 const middy = require('@middy/core');
 const cors = require('@middy/http-cors');
 const httpErrorHandler = require('@middy/http-error-handler');
+const dynamodb = require('serverless-dynamodb-client');
 
 const uuid = require('uuid');
 const AWS = require('aws-sdk');
 
-if (process.env.IS_LOCAL) {
-  const credentials = new AWS.SharedIniFileCredentials({ profile: 'personal' });
-  AWS.config.credentials = credentials;
-}
+// if (process.env.IS_OFFLINE) {
+const credentials = new AWS.SharedIniFileCredentials({ profile: 'personal' });
+AWS.config.credentials = credentials;
+// }
 
 AWS.config.update({ region: 'ap-southeast-2' });
 AWS.config.setPromisesDependency(require('bluebird'));
 
-const clientOptions = (process.env.IS_LOCAL
-  ? {
-    region: 'localhost',
-    endpoint: 'http://localhost:8000',
-    accessKeyId: 'DEFAULT_ACCESS_KEY',
-    secretAccessKey: 'DEFAULT_SECRET',
-  }
-  : {});
+// const clientOptions = process.env.IS_OFFLINE
+//   ? {
+//     region: 'localhost',
+//     endpoint: 'http://localhost:8000',
+//     accessKeyId: 'DEFAULT_ACCESS_KEY',
+//     secretAccessKey: 'DEFAULT_SECRET',
+//   }
+//   : {};
 
-const db = new AWS.DynamoDB.DocumentClient(clientOptions);
+// const db = new AWS.DynamoDB.DocumentClient();
+const db = dynamodb.doc;
 
 const create = middy((event) => {
   const { descr, img } = JSON.parse(event.body);

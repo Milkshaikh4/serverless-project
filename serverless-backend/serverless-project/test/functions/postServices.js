@@ -12,13 +12,14 @@ describe('CreatePost', () => {
   const event1 = { body: {} };
   const event2 = { body: {} };
 
-  const params1 = {
+  const params1 = () => ({
     FunctionName: 'createPost',
     InvocationType: 'RequestResponse',
     Payload: JSON.stringify(event2),
-  };
+  });
 
   const create = new Lambda({
+    apiVersion: '2015-03-31',
     endpoint:
       'http://localhost:3000/2015-03-31/functions/createPost/invocations',
   });
@@ -34,14 +35,12 @@ describe('CreatePost', () => {
   }
 
   // eslint-disable-next-line arrow-body-style
-  it('it should create a post and return successful when given post request', () => {
-    create
-      .invoke(params1)
-      .promise()
-      .then((response) => {
-        expect(response).to.not.be.empty();
-        expect(response.statusCode).to.equal(200);
-      });
+  // eslint-disable-next-line prefer-arrow-callback
+  it('it should create a post and return successful when given post request', async function () {
+    const res = await create.invoke(params1()).promise();
+
+    expect(res).to.not.be.empty();
+    expect(res.statusCode).to.equal(200);
   });
 });
 

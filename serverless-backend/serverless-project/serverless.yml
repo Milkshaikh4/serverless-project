@@ -62,10 +62,10 @@ functions:
           path: post/{id}
           method: delete 
           cors: true
-    request:
-      parameters:
-        paths:
-          id: true
+    # request:
+    #   parameters:
+    #     paths:
+    #       id: true
 
 resources: 
   Resources: 
